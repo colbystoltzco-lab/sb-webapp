@@ -1,0 +1,24 @@
+{
+  "sales_reps": [
+    {"name":"Shaun Mortimer","phone":"(629) 210-8472","email":"Shaun@StoltzCo.com", "default": true},
+    {"name":"Charles Bellar","phone":"(615) 506-6557","email":"Charles@StoltzCo.com"},
+    {"name":"Justin Wright","phone":"(217) 556-9199","email":"Justin@StoltzCo.com"},
+    {"name":"Mahlon Stoltz","phone":"(615) 681-6281","email":"Mahlon@StoltzCo.com"},
+    {"name":"Will Stoltz","phone":"(615) 970-9514","email":"Will@StoltzCo.com"},
+    {"name":"Alissa Winski","phone":"(629) 279-5237","email":"Alissa@Stoltzco.com"},
+    {"name":"Elvin Lapp","phone":"(814) 386-6836","email":"Elvin@StoltzCo.com"},
+    {"name":"Colby Simons","phone":"(629) 932-9792","email":"Colby@StoltzCo.com"}
+  ],
+  "project_managers": [
+    {"name":"JD Gorman","phone":"(615) 856-3029","email":"JD@StoltzCo.com", "default": true},
+    {"name":"Drew Drake","phone":"(629) 932-9791","email":"Drew@StoltzCo.com"},
+    {"name":"Liam Brown","phone":"(629) 932-9789","email":"Liam@StoltzCo.com"}
+  ],
+  "ops_managers": [
+    {"name":"Chris Shaw","phone":"629-279-4030","email":"Chris@StoltzCo.com", "default": true}
+  ],
+  "follow_up_types": [
+    "Sales Follow Up","Design Meeting","Phone Call Meeting","Site Visit","Drafting Plans","Needs Estimate"
+  ],
+  "defaults": { "starting_model_name_contains": "30x40" }
+}

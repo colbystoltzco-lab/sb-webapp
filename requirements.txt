@@ -1,0 +1,5 @@
+﻿requests==2.32.3
+tenacity==9.0.0
+python-dotenv==1.0.1
+Flask==3.0.3
+waitress==3.0.2

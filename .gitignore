@@ -1,0 +1,20 @@
+﻿# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual env
+.venv/
+env/
+
+# Local artifacts
+out/
+*.log
+
+# Secrets (NEVER commit)
+.env
+
+# Editors
+.vscode/
+.idea/
