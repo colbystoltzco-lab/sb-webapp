@@ -126,6 +126,12 @@ def _normalize_outputters(items):
             out.append({"Id": it, "Slot": None, "Name": it, "Group": ""})
     return out
 
+def _norm_text(s: str) -> str:
+    # lowercase, replace non-alphanumeric with spaces, collapse spaces
+    s = (s or "").lower()
+    s = re.sub(r"[^a-z0-9]+", " ", s)
+    return re.sub(r"\s+", " ", s).strip()
+
 def _is_name_allowed(name: str) -> bool:
     if not ALLOWED_USERS:
         return True  # no list configured -> allow any name
