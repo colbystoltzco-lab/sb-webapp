@@ -699,7 +699,7 @@ def enter():
 <h2>Enter</h2>
 <form method="post" action="{{ url_for('enter', next=next_url) }}">
   <label>Your Name</label>
-  <input type="text" name="name" placeholder="First Last" autofocus required>
+  <input type="text" name="name" placeholder="" autofocus required>
   <div style="margin-top:.75rem">
     <button type="submit">Continue</button>
   </div>
