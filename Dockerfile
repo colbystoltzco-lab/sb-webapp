@@ -1,24 +1,20 @@
+# Dockerfile at repo root
+
 FROM python:3.11-slim
 
-# Prevent .pyc files and force unbuffered logs
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-
+# Create and switch to app directory
 WORKDIR /app
 
-# Install deps
+# Install dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the application code
+# Copy the rest of the code
 COPY . .
 
-# Cloud Run will inject $PORT; default to 8080 for local debugging
-ENV PORT=8080
+# Cloud Run will inject PORT, but waitress needs to listen on it
+ENV PYTHONUNBUFFERED=1
 
-# Ensure output directory exists (just in case)
-RUN mkdir -p out/outputs
-
-# Start Waitress serving the Flask app
-# web_app:app => "app" object inside web_app.py
+# Start the app with waitress, binding to 0.0.0.0:$PORT as Cloud Run requires
+# "web_app:app" = module "web_app", object "app"
 CMD ["sh", "-c", "waitress-serve --listen=0.0.0.0:${PORT} web_app:app"]

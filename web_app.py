@@ -37,6 +37,9 @@ SMARTBUILD_TEMPLATE_ID = os.getenv("SMARTBUILD_TEMPLATE_ID", "")
 ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "")
 TESTING_MODE = os.getenv("SMARTBUILD_TESTING_MODE", "false").lower() in ("1", "true", "yes")
 APP_PORT = int(os.getenv("APP_PORT", "8080"))
+# --- Simple Auth ---
+ALLOWED_USERS = [u.strip().lower() for u in os.getenv("ALLOWED_USERS", "").split(",") if u.strip()]
+REQUIRE_LOGIN = (os.getenv("REQUIRE_LOGIN", "true").lower() in ("1","true","yes"))
 
 # Flask config
 app = Flask(__name__)
@@ -122,6 +125,11 @@ def _normalize_outputters(items):
         elif isinstance(it, str):
             out.append({"Id": it, "Slot": None, "Name": it, "Group": ""})
     return out
+
+def _is_name_allowed(name: str) -> bool:
+    if not ALLOWED_USERS:
+        return True  # no list configured -> allow any name
+    return name.strip().lower() in ALLOWED_USERS
 
 # ---------- SmartBuildClient ----------
 class SmartBuildError(Exception):
@@ -657,6 +665,48 @@ def home():
         ),
     )
 
+from flask import session
+
+@app.route("/enter", methods=["GET", "POST"])
+def enter():
+    next_url = request.args.get("next") or url_for("home")
+
+    # Convenience: allow ?as=Name to set quickly (only if allowed)
+    as_name = (request.args.get("as") or "").strip()
+    if as_name:
+        if _is_name_allowed(as_name):
+            session["user_name"] = as_name
+            return redirect(next_url)
+        else:
+            flash("Name not allowed.", "error")
+            return redirect(url_for("enter", next=next_url))
+
+    if request.method == "POST":
+        name = (request.form.get("name") or "").strip()
+        if not name:
+            flash("Name is required.", "error")
+            return redirect(url_for("enter", next=next_url))
+        if not _is_name_allowed(name):
+            flash("You’re not on the allowed users list.", "error")
+            return redirect(url_for("enter", next=next_url))
+
+        # Session is *not* permanent → expires on browser close
+        session["user_name"] = name
+        return redirect(next_url)
+
+    # GET
+    body = """
+<h2>Enter</h2>
+<form method="post" action="{{ url_for('enter', next=next_url) }}">
+  <label>Your Name</label>
+  <input type="text" name="name" placeholder="First Last" autofocus required>
+  <div style="margin-top:.75rem">
+    <button type="submit">Continue</button>
+  </div>
+</form>
+"""
+    return render_page("Enter", render_template_string(body, next_url=next_url))
+
 # ---------- Route: Create Job ----------
 @app.route("/create", methods=["POST"])
 def create():
@@ -1008,6 +1058,17 @@ def _assert_api_ready() -> None:
         client.login()
         client.test()
         client.get_version()
+
+@app.before_request
+def _require_name_gate():
+    if not REQUIRE_LOGIN:
+        return
+    # Let these through:
+    open_paths = {"/enter", "/healthz"}
+    if request.path in open_paths or request.path.startswith("/static"):
+        return
+    if not session.get("user_name"):
+        return redirect(url_for("enter", next=(request.full_path if request.query_string else request.path)))
 
 # ---------- Main ----------
 
