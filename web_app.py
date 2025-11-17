@@ -26,7 +26,7 @@ import requests
 # ---------- Bootstrap ----------
 load_dotenv(override=False)
 
-APP_NAME = "StoltzCo SmartBuild Bridge"
+APP_NAME = "StoltzCo SmartBuild Bridge • v0.2"
 OUT_DIR = Path("out/outputs")
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
