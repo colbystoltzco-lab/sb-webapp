@@ -212,11 +212,14 @@ class SmartBuildClient:
             })
         return items
 
-    def get_project_list(self, filter_text: str = "", offset: int = 0, count: int = 50,
+    
+    def get_project_list(self, filter_text: str = "", offset: int = 0, count: int = 0,
                          user: Optional[str] = None, status: Optional[str] = None) -> Dict[str, Any]:
         """
         Returns a normalized dict: {"Projects": [...], "Count": int}
-        Tries multiple param combos on 403, since some tenants require user/status.
+        SmartBuild does NOT support text search on the `filter` param.
+        `count=0` returns ALL jobs.
+        We fetch all jobs, then rely on client-side filtering.
         """
         def _normalize(resp: Any) -> Dict[str, Any]:
             if isinstance(resp, dict):
@@ -231,11 +234,11 @@ class SmartBuildClient:
             else:
                 return {"Projects": [], "Count": 0}
 
+        # Corrected attempts: do NOT send filter_text to SmartBuild.
         attempts: List[Tuple[Dict[str, Any], str]] = [
-            ({"offset": offset, "count": count, **({"filter": filter_text} if filter_text else {})}, "minimal"),
-            ({"offset": offset, "count": count, **({"filter": filter_text} if filter_text else {}), "status": "Active"}, "status_active"),
-            ({"offset": offset, "count": count, **({"filter": filter_text} if filter_text else {}), **({"user": self.username} if self.username else {})}, "with_user"),
-            ({"offset": offset, "count": count}, "no_filter"),
+            ({"offset": 0, "count": 0}, "all_no_filter"),
+            ({"offset": 0, "count": 0, "status": "Active"}, "all_active"),
+            ({"offset": 0, "count": 0, "user": self.username}, "all_by_user"),
         ]
 
         last_err = None
@@ -800,7 +803,7 @@ def outputs():
         if job_id:
             search_results = [{"JobId": job_id, "Project": "(by id)", "CustomerName": ""}]
         else:
-            jobs = client.get_project_list(filter_text=q, offset=0, count=200)
+            jobs = client.get_project_list(filter_text=q, offset=0, count=0)
             raw = jobs["Projects"]
             search_results = [_normalize_project_item(x) for x in raw]
             search_results = _client_side_filter(search_results, q)
